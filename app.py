@@ -782,10 +782,7 @@ with right:
 
                         board[idx] = st.session_state.symbol
 
-                        if winner(
-                            board,
-                            st.session_state.symbol
-                        ):
+                        if winner(board, st.session_state.symbol):
                             st.session_state.game_over = True
 
                         elif not board_full(board):
@@ -813,7 +810,7 @@ with right:
             reset_game()
             st.rerun()
 
-    # ================= SOS =================
+    # ================= SOS 7x7 =================
 
     else:
 
@@ -823,12 +820,15 @@ with right:
                 for _ in range(7)
             ]
 
-        if "sos_score" not in st.session_state:
-            st.session_state.sos_score = 0
+        if "sos_player_score" not in st.session_state:
+            st.session_state.sos_player_score = 0
+
+        if "sos_ai_score" not in st.session_state:
+            st.session_state.sos_ai_score = 0
 
         def count_sos(board):
 
-            count = 0
+            total = 0
 
             dirs = [
                 (0,1),
@@ -850,26 +850,49 @@ with right:
                         c2 = c + 2*dc
 
                         if (
-                            0 <= r2 < 7
-                            and
+                            0 <= r2 < 7 and
                             0 <= c2 < 7
                         ):
 
                             if (
-                                board[r][c] == "S"
-                                and
-                                board[r1][c1] == "O"
-                                and
+                                board[r][c] == "S" and
+                                board[r1][c1] == "O" and
                                 board[r2][c2] == "S"
                             ):
-                                count += 1
+                                total += 1
 
-            return count
+            return total
+
+        def ai_move(board):
+
+            empty = []
+
+            for r in range(7):
+                for c in range(7):
+
+                    if board[r][c] == "":
+                        empty.append((r,c))
+
+            if empty:
+
+                r,c = random.choice(empty)
+
+                board[r][c] = random.choice(
+                    ["S","O"]
+                )
 
         symbol = st.radio(
-            "Choose",
+            "Choose Letter",
             ["S","O"],
-            key="sos_symbol"
+            key="sos_letter"
+        )
+
+        st.success(
+            f"🙂 You : {st.session_state.sos_player_score}"
+        )
+
+        st.error(
+            f"🤖 AI : {st.session_state.sos_ai_score}"
         )
 
         board = st.session_state.sos_board
@@ -880,28 +903,64 @@ with right:
 
             for c in range(7):
 
-                txt = board[r][c]
+                value = board[r][c]
 
-                if txt == "":
-                    txt = " "
+                if value == "":
+                    value = " "
 
                 if cols[c].button(
-                    txt,
+                    value,
                     key=f"sos_{r}_{c}",
                     use_container_width=True
                 ):
 
                     if board[r][c] == "":
 
+                        before = count_sos(board)
+
                         board[r][c] = symbol
 
-                        st.session_state.sos_score = count_sos(board)
+                        after = count_sos(board)
+
+                        st.session_state.sos_player_score += (
+                            after - before
+                        )
+
+                        ai_before = count_sos(board)
+
+                        ai_move(board)
+
+                        ai_after = count_sos(board)
+
+                        st.session_state.sos_ai_score += (
+                            ai_after - ai_before
+                        )
 
                         st.rerun()
 
-        st.success(
-            f"🏆 SOS Count: {st.session_state.sos_score}"
-        )
+        filled = 0
+
+        for r in range(7):
+            for c in range(7):
+                if board[r][c] != "":
+                    filled += 1
+
+        if filled == 49:
+
+            if (
+                st.session_state.sos_player_score >
+                st.session_state.sos_ai_score
+            ):
+                st.success("🏆 You Won!")
+
+            elif (
+                st.session_state.sos_player_score <
+                st.session_state.sos_ai_score
+            ):
+                st.error("💀 AI Won!")
+
+            else:
+                st.info("🤝 Draw!")
 
         if st.button("🔄 Reset SOS"):
 
@@ -910,6 +969,7 @@ with right:
                 for _ in range(7)
             ]
 
-            st.session_state.sos_score = 0
+            st.session_state.sos_player_score = 0
+            st.session_state.sos_ai_score = 0
 
             st.rerun()
