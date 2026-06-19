@@ -2,7 +2,7 @@ import streamlit as st
 import sqlite3
 import random
 
-FINISH_LINE = 50
+FINISH_LINE = 120
 
 # ---------------- DATABASE ----------------
 
