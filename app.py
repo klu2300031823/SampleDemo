@@ -660,74 +660,256 @@ with left:
 
 # ================= RIGHT SIDE GAME =================
 
+# with right:
+
+#     st.subheader("🎮 Feeling Bore?")
+#     st.write("Play Tic Tac Toe")
+
+#     symbol = st.radio(
+#         "Choose Symbol",
+#         ["X", "O"],
+#         key="choose_symbol"
+#     )
+
+#     st.session_state.symbol = symbol
+#     st.session_state.computer = (
+#         "O" if symbol == "X" else "X"
+#     )
+
+#     board = st.session_state.board
+
+#     for row in range(3):
+
+#         cols = st.columns(3)
+
+#         for col in range(3):
+
+#             idx = row * 3 + col
+
+#             text = board[idx] if board[idx] != "" else " "
+
+#             if cols[col].button(
+#                 text,
+#                 key=f"cell_{idx}",
+#                 use_container_width=True
+#             ):
+
+#                 if (
+#                     board[idx] == ""
+#                     and not st.session_state.game_over
+#                 ):
+
+#                     board[idx] = st.session_state.symbol
+
+#                     if winner(
+#                         board,
+#                         st.session_state.symbol
+#                     ):
+#                         st.session_state.game_over = True
+
+#                     elif not board_full(board):
+
+#                         computer_move()
+
+#                         if winner(
+#                             board,
+#                             st.session_state.computer
+#                         ):
+#                             st.session_state.game_over = True
+
+#                     st.rerun()
+
+#     if winner(board, st.session_state.symbol):
+#         st.success("🏆 You Won!")
+
+#     elif winner(board, st.session_state.computer):
+#         st.error("💀 Computer Won!")
+
+#     elif board_full(board):
+#         st.info("🤝 Draw!")
+
+#     if st.button("🔄 New Game"):
+#         reset_game()
+#         st.rerun()
 with right:
 
     st.subheader("🎮 Feeling Bore?")
-    st.write("Play Tic Tac Toe")
 
-    symbol = st.radio(
-        "Choose Symbol",
-        ["X", "O"],
-        key="choose_symbol"
+    game = st.selectbox(
+        "Choose Game",
+        ["Tic Tac Toe", "SOS 7x7"]
     )
 
-    st.session_state.symbol = symbol
-    st.session_state.computer = (
-        "O" if symbol == "X" else "X"
-    )
+    # ================= TIC TAC TOE =================
 
-    board = st.session_state.board
+    if game == "Tic Tac Toe":
 
-    for row in range(3):
+        st.write("Play Tic Tac Toe")
 
-        cols = st.columns(3)
+        symbol = st.radio(
+            "Choose Symbol",
+            ["X", "O"],
+            key="choose_symbol"
+        )
 
-        for col in range(3):
+        st.session_state.symbol = symbol
+        st.session_state.computer = (
+            "O" if symbol == "X" else "X"
+        )
 
-            idx = row * 3 + col
+        board = st.session_state.board
 
-            text = board[idx] if board[idx] != "" else " "
+        for row in range(3):
 
-            if cols[col].button(
-                text,
-                key=f"cell_{idx}",
-                use_container_width=True
-            ):
+            cols = st.columns(3)
 
-                if (
-                    board[idx] == ""
-                    and not st.session_state.game_over
+            for col in range(3):
+
+                idx = row * 3 + col
+
+                text = board[idx] if board[idx] != "" else " "
+
+                if cols[col].button(
+                    text,
+                    key=f"cell_{idx}",
+                    use_container_width=True
                 ):
 
-                    board[idx] = st.session_state.symbol
-
-                    if winner(
-                        board,
-                        st.session_state.symbol
+                    if (
+                        board[idx] == ""
+                        and not st.session_state.game_over
                     ):
-                        st.session_state.game_over = True
 
-                    elif not board_full(board):
-
-                        computer_move()
+                        board[idx] = st.session_state.symbol
 
                         if winner(
                             board,
-                            st.session_state.computer
+                            st.session_state.symbol
                         ):
                             st.session_state.game_over = True
 
-                    st.rerun()
+                        elif not board_full(board):
 
-    if winner(board, st.session_state.symbol):
-        st.success("🏆 You Won!")
+                            computer_move()
 
-    elif winner(board, st.session_state.computer):
-        st.error("💀 Computer Won!")
+                            if winner(
+                                board,
+                                st.session_state.computer
+                            ):
+                                st.session_state.game_over = True
 
-    elif board_full(board):
-        st.info("🤝 Draw!")
+                        st.rerun()
 
-    if st.button("🔄 New Game"):
-        reset_game()
-        st.rerun()
+        if winner(board, st.session_state.symbol):
+            st.success("🏆 You Won!")
+
+        elif winner(board, st.session_state.computer):
+            st.error("💀 Computer Won!")
+
+        elif board_full(board):
+            st.info("🤝 Draw!")
+
+        if st.button("🔄 New Game"):
+            reset_game()
+            st.rerun()
+
+    # ================= SOS =================
+
+    else:
+
+        if "sos_board" not in st.session_state:
+            st.session_state.sos_board = [
+                ["" for _ in range(7)]
+                for _ in range(7)
+            ]
+
+        if "sos_score" not in st.session_state:
+            st.session_state.sos_score = 0
+
+        def count_sos(board):
+
+            count = 0
+
+            dirs = [
+                (0,1),
+                (1,0),
+                (1,1),
+                (1,-1)
+            ]
+
+            for r in range(7):
+
+                for c in range(7):
+
+                    for dr, dc in dirs:
+
+                        r1 = r + dr
+                        c1 = c + dc
+
+                        r2 = r + 2*dr
+                        c2 = c + 2*dc
+
+                        if (
+                            0 <= r2 < 7
+                            and
+                            0 <= c2 < 7
+                        ):
+
+                            if (
+                                board[r][c] == "S"
+                                and
+                                board[r1][c1] == "O"
+                                and
+                                board[r2][c2] == "S"
+                            ):
+                                count += 1
+
+            return count
+
+        symbol = st.radio(
+            "Choose",
+            ["S","O"],
+            key="sos_symbol"
+        )
+
+        board = st.session_state.sos_board
+
+        for r in range(7):
+
+            cols = st.columns(7)
+
+            for c in range(7):
+
+                txt = board[r][c]
+
+                if txt == "":
+                    txt = " "
+
+                if cols[c].button(
+                    txt,
+                    key=f"sos_{r}_{c}",
+                    use_container_width=True
+                ):
+
+                    if board[r][c] == "":
+
+                        board[r][c] = symbol
+
+                        st.session_state.sos_score = count_sos(board)
+
+                        st.rerun()
+
+        st.success(
+            f"🏆 SOS Count: {st.session_state.sos_score}"
+        )
+
+        if st.button("🔄 Reset SOS"):
+
+            st.session_state.sos_board = [
+                ["" for _ in range(7)]
+                for _ in range(7)
+            ]
+
+            st.session_state.sos_score = 0
+
+            st.rerun()
