@@ -451,43 +451,158 @@ def reset_game():
     st.session_state.board = [""] * 9
     st.session_state.game_over = False
 
-def winner(board, sym):
+# def winner(board, sym):
+#     wins = [
+#         [0,1,2],
+#         [3,4,5],
+#         [6,7,8],
+#         [0,3,6],
+#         [1,4,7],
+#         [2,5,8],
+#         [0,4,8],
+#         [2,4,6]
+#     ]
+
+#     for w in wins:
+#         if (
+#             board[w[0]] == sym and
+#             board[w[1]] == sym and
+#             board[w[2]] == sym
+#         ):
+#             return True
+
+#     return False
+
+# def board_full(board):
+#     return "" not in board
+
+# def computer_move():
+
+#     empty = []
+
+#     for i in range(9):
+#         if st.session_state.board[i] == "":
+#             empty.append(i)
+
+#     if empty:
+#         move = random.choice(empty)
+#         st.session_state.board[move] = st.session_state.computer
+def winner(board, player):
     wins = [
-        [0,1,2],
-        [3,4,5],
-        [6,7,8],
-        [0,3,6],
-        [1,4,7],
-        [2,5,8],
-        [0,4,8],
-        [2,4,6]
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
     ]
 
     for w in wins:
-        if (
-            board[w[0]] == sym and
-            board[w[1]] == sym and
-            board[w[2]] == sym
-        ):
+        if board[w[0]] == player and board[w[1]] == player and board[w[2]] == player:
             return True
 
     return False
 
+
 def board_full(board):
     return "" not in board
 
-def computer_move():
 
-    empty = []
+def minimax(board, depth, is_maximizing):
+
+    ai = st.session_state.computer
+    human = st.session_state.symbol
+
+    if winner(board, ai):
+        return 10 - depth
+
+    if winner(board, human):
+        return depth - 10
+
+    if board_full(board):
+        return 0
+
+    if is_maximizing:
+
+        best_score = -1000
+
+        for i in range(9):
+
+            if board[i] == "":
+                board[i] = ai
+
+                score = minimax(
+                    board,
+                    depth + 1,
+                    False
+                )
+
+                board[i] = ""
+
+                best_score = max(
+                    best_score,
+                    score
+                )
+
+        return best_score
+
+    else:
+
+        best_score = 1000
+
+        for i in range(9):
+
+            if board[i] == "":
+                board[i] = human
+
+                score = minimax(
+                    board,
+                    depth + 1,
+                    True
+                )
+
+                board[i] = ""
+
+                best_score = min(
+                    best_score,
+                    score
+                )
+
+        return best_score
+
+
+def best_move():
+
+    board = st.session_state.board
+    ai = st.session_state.computer
+
+    best_score = -1000
+    move = None
 
     for i in range(9):
-        if st.session_state.board[i] == "":
-            empty.append(i)
 
-    if empty:
-        move = random.choice(empty)
+        if board[i] == "":
+
+            board[i] = ai
+
+            score = minimax(
+                board,
+                0,
+                False
+            )
+
+            board[i] = ""
+
+            if score > best_score:
+                best_score = score
+                move = i
+
+    return move
+
+
+def computer_move():
+
+    move = best_move()
+
+    if move is not None:
         st.session_state.board[move] = st.session_state.computer
-
 # ================= STYLE =================
 
 st.markdown("""
