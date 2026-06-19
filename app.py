@@ -341,7 +341,7 @@ st.markdown("""
 
 # ---------------- HEADER ----------------
 
-st.title("💬 Anonymous Chat")
+st.title("💬 Prendsgram Inspired by Future Google CEO Murala Sai Ganesh")
 
 # ---------------- MESSAGE INPUT ----------------
 
